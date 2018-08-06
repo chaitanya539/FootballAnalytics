@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+## -*- coding: utf-8 -*-
 """
 @author: Chaitanya
 """
@@ -36,10 +36,10 @@ PerMinute_skills = Positional_skills.iloc[:,2:].divide(Positional_skills.Mins, a
 #Post aggregation of data
 X = PerMinute_skills.iloc[:,1:]
 y = Positional_skills.iloc[:,0]
-y1 = pd.get_dummies(y)
+
 
 from sklearn.cross_validation import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y1, test_size = 0.25, random_state = 0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25, random_state = 0)
 
 # Feature Scaling
 from sklearn.preprocessing import StandardScaler
@@ -50,58 +50,15 @@ X_test = sc.transform(X_test)
 # Fitting classifier to the Training set
 from sklearn.naive_bayes import GaussianNB
 classifier = GaussianNB()
-classifier.fit(X_train, y_train.MF)
+classifier.fit(X_train, y_train)
 
 # Predicting the Test set results
 y_pred = classifier.predict(X_test)
 
-# Making the Confusion Matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test.MF, y_pred)
-
-print('percentage accuracy for predicting the position of a midfeilder is' , 100*(cm[0][0]+cm[1][1])/cm.sum())
+y_test = pd.DataFrame(y_test)
+y_pred = pd.DataFrame(y_pred)
+y_pred.columns = ['Predicted_values']
+comparision = pd.concat([y_test.reset_index(drop = True), y_pred], axis = 1)
+comparision['result'] = np.where(comparision.Predicted_values == comparision.Position,1,0)
+print('percentage accuracy for predicting the position of a player is' , comparision.result.sum()*100/len(y_pred))
 ### repeating the same for goalkeeper
-
-from sklearn.naive_bayes import GaussianNB
-classifier = GaussianNB()
-classifier.fit(X_train, y_train.GK)
-
-# Predicting the Test set results
-y_pred = classifier.predict(X_test)
-
-# Making the Confusion Matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test.GK, y_pred)
-
-print('percentage accuracy for predicting the position of a goalkeeper is' , 100*(cm[0][0]+cm[1][1])/cm.sum())
-#repeating the same for Forwards
-
-from sklearn.naive_bayes import GaussianNB
-classifier = GaussianNB()
-classifier.fit(X_train, y_train.FW)
-
-# Predicting the Test set results
-y_pred = classifier.predict(X_test)
-
-# Making the Confusion Matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test.FW, y_pred)
-
-print('percentage accuracy for predicting the position of a forward is' , 100*(cm[0][0]+cm[1][1])/cm.sum())
-
-#repeating the same for defenders
-from sklearn.naive_bayes import GaussianNB
-classifier = GaussianNB()
-classifier.fit(X_train, y_train.DF)
-
-# Predicting the Test set results
-y_pred = classifier.predict(X_test)
-
-# Making the Confusion Matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test.DF, y_pred)
-print('percentage accuracy for predicting the position of a defender is' , 100*(cm[0][0]+cm[1][1])/cm.sum())
-#78% accuracy for DFs
-#100% accuracy for goal keepers
-#79% accuracy for Forwards
-#63.7 % accuracy for Midfielders
